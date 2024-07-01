@@ -1,28 +1,50 @@
 import "./App.css";
 import { Movies } from "./components/Movies";
 import { useMovies } from "./hooks/useMovies";
-import { useRef } from "react"; // no renderiza el componente todo el tiempo
+import { useEffect, useRef, useState } from "react"; // no renderiza el componente todo el tiempo
 
 function App() {
   const { movies } = useMovies();
   const inputRef = useRef();
-  const handleClick = () => {
-    const valueEl = inputRef.current;
+  const [query, setQuery] = useState("");
+  const [error, setError] = useState(null);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    // const fields = Object.fromEntries(new window.FormData(event.target));
+    console.log({ query });
   };
+
+  const handleChange = (event) => {
+    setQuery(event.target.value);
+  };
+
+  useEffect(() => {
+    if (query === "") {
+      setError("No se puede buscar una pelicula vacia");
+      return;
+    }
+    if (query.match(/^\d+$/)) {
+      setError("No se puede buscar una pelicula con un numero");
+      return;
+    }
+    setError(null);
+  }, [query]);
+
   return (
     <div className="page">
       <header>
         <h1>Buscador de Pelicuas</h1>
-        <form action="" className="form">
+        <form action="" className="form" onSubmit={handleSubmit}>
           <input
-            ref={inputRef}
             type="text "
             placeholder="Avenger, Star Wars, The Matrix"
+            name="query"
+            onChange={handleChange}
           />
-          <button onClick={handleClick} type="submit">
-            Buscar
-          </button>
+          <button type="submit">Buscar</button>
         </form>
+        {error && <p style={{ color: "red" }}>{error}</p>}
       </header>
       <main>
         <Movies movies={movies} />
